@@ -501,7 +501,7 @@ Let’s explore new opportunities together, spark more engagement, and make digi
                 <p>You are connected with the following wallet:</p>
                 <div class="address-container">
                     <strong>Address:</strong>
-                    <span id="wallet-address"></span>
+                    <span id="wallet-address">Loading...</span>
                 </div>
                 <button class="primary-btn danger" id="disconnect-btn">Disconnect</button>
             </div>
@@ -523,10 +523,28 @@ Let’s explore new opportunities together, spark more engagement, and make digi
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            
             // 1. TON Connect UI শুরু করা
+            // এখানে manifestUrl এর বদলে সরাসরি manifest অবজেক্টটি দেওয়া হয়েছে
             const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                // আপনার Vercel সাইটে এই ফাইলটি থাকতে হবে
-                manifestUrl: 'https://git-main-tem-vrs-projects.vercel.app/tonconnect-manifest.json',
+                manifest: {
+                    url: 'https://git-main-tem-vrs-projects.vercel.app',
+                    name: 'TON Airdrop',
+                    iconUrl: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjhnqz9kGWNmfSZvGJrt__XxF_e_d3QFH4s5YdD10OjY9Kj0i6TsDdQZKhyWOwyj5IqHFy-mLxyKj30iX5tzecU3HB1P9C-zLeMKJOGszohsBbV8P99rWFYT0KCD7sW71yV_Gb3BprZhQ8-QrmYiaQwue9WtKlO2dV4C25AyiDmsG5OfcB2-jrlu8xN56fa/s450/image_downloader_1760986006457.png',
+                    termsOfUseUrl: 'https://git-main-tem-vrs-projects.vercel.app/terms',
+                    privacyPolicyUrl: 'https://git-main-tem-vrs-projects.vercel.app/privacy',
+                    bridge: [
+                        {
+                            type: 'sse',
+                            url: 'https://bridge.tonapi.io/bridge'
+                        },
+                        {
+                            type: 'js',
+                            key: 'tonkeeper'
+                        }
+                    ],
+                    platforms: ['chrome', 'firefox', 'safari', 'ios', 'android', 'macos', 'windows', 'linux']
+                }
             });
 
             // 2. DOM Elements গুলোকে সিলেক্ট করা
@@ -590,7 +608,7 @@ Let’s explore new opportunities together, spark more engagement, and make digi
                 if (tonConnectUI.connected) {
                     // যদি ওয়ালেট কানেক্ট থাকে, ঠিকানা দেখান ও সেটিং মডাল খুলুন
                     const address = tonConnectUI.account.address;
-                    walletAddressSpan.textContent = formatAddress(address);
+                    walletAddressSpan.textContent = formatAddress(address); // ঠিকানা এখানে বসানো হলো
                     openModal(settingsModal);
                 } else {
                     // কানেক্ট না থাকলে কানেক্ট মডাল দেখান
@@ -614,11 +632,11 @@ Let’s explore new opportunities together, spark more engagement, and make digi
             tonConnectUI.onStatusChange(wallet => {
                 if (wallet) {
                     console.log('Wallet connected:', wallet.account.address);
-                    // কানেক্ট হওয়ার পর অটোমেটিক মডাল বন্ধ করতে পারেন
-                    closeModal(settingsModal);
-                    closeModal(withdrawalModal);
+                    // কানেক্ট হওয়ার সাথে সাথে অ্যাড্রেসটি সেটিং মডালের জন্য প্রস্তুত রাখা হচ্ছে
+                    walletAddressSpan.textContent = formatAddress(wallet.account.address);
                 } else {
                     console.log('Wallet disconnected.');
+                    walletAddressSpan.textContent = 'Not Connected'; // ডিসকানেক্ট হলে লেখা পরিবর্তন
                 }
             });
 
