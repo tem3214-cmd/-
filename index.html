@@ -204,6 +204,11 @@
             background-color: #e53935;
         }
 
+        .primary-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
         /* Tasks Section */
         .get-more-section {
             margin-top: 30px;
@@ -676,7 +681,6 @@
     </div>
 
     <script>
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCwA7MWHzGnc3PRVvFQdqMEZF4lmaMM0dI",
             authDomain: "vton-air-dr-op.firebaseapp.com",
@@ -696,8 +700,8 @@
         let userData = null;
         let settings = null;
         let adsWatchedToday = 0;
+        let referrerUserId = null;
 
-        // Initialize
         async function init() {
             tg.ready();
             tg.expand();
@@ -713,20 +717,22 @@
             // Get Telegram User
             const telegramUser = tg.initDataUnsafe.user;
             if (telegramUser) {
+                // Check for referral parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                referrerUserId = urlParams.get('ref');
+
                 await initializeUser(telegramUser);
             }
 
             // Load Settings
             await loadSettings();
 
-            // Setup Event Listeners
             setupEventListeners();
 
             // Update UI
             updateUI();
         }
 
-        // Check VPN
         async function checkVPN() {
             try {
                 const response = await fetch('https://ipapi.co/json/');
@@ -736,12 +742,11 @@
                     return true;
                 }
             } catch (error) {
-                console.log('VPN check failed:', error);
+                console.log('[v0] VPN check failed:', error);
             }
             return false;
         }
 
-        // Initialize User
         async function initializeUser(telegramUser) {
             const userId = telegramUser.id.toString();
             const userRef = db.collection('users').doc(userId);
@@ -751,8 +756,16 @@
 
                 if (!userDoc.exists) {
                     // New User - Generate Random Bonus
-                    const bonus = Math.floor(Math.random() * 3) + 5; // 5-7 TON
-                    const referralCode = generateReferralCode();
+                    let bonus = 0;
+                    if (referrerUserId) {
+                        // Referral bonus: 8-11 TON
+                        bonus = Math.floor(Math.random() * 4) + 8;
+                    } else {
+                        // Direct signup bonus: 5-7 TON
+                        bonus = Math.floor(Math.random() * 3) + 5;
+                    }
+
+                    const referralCode = userId; // Use user ID as referral code
 
                     const newUserData = {
                         id: userId,
@@ -770,6 +783,8 @@
                         verified: false,
                         referralVerified: false,
                         referralCount: 0,
+                        referredBy: referrerUserId || null,
+                        totalEarnings: bonus,
                         createdAt: new Date()
                     };
 
@@ -777,11 +792,17 @@
                     userData = newUserData;
                     currentUser = userId;
 
+                    // If referred by someone, add to referrer's list and give commission
+                    if (referrerUserId) {
+                        await addReferral(referrerUserId, userId, bonus);
+                    }
+
                     // Show unverified overlay
                     document.getElementById('unverifiedOverlay').classList.add('active');
                 } else {
                     userData = userDoc.data();
                     currentUser = userId;
+                    adsWatchedToday = userData.adsWatchedToday || 0;
 
                     // Check if verified
                     if (!userData.verified) {
@@ -789,11 +810,34 @@
                     }
                 }
             } catch (error) {
-                console.error('Error initializing user:', error);
+                console.error('[v0] Error initializing user:', error);
             }
         }
 
-        // Load Settings
+        async function addReferral(referrerUserId, newUserId, bonus) {
+            try {
+                const referrerRef = db.collection('users').doc(referrerUserId);
+                const referrerDoc = await referrerRef.get();
+
+                if (referrerDoc.exists) {
+                    const referrerData = referrerDoc.data();
+                    const referrals = referrerData.referrals || [];
+                    referrals.push(newUserId);
+
+                    // Give 50% commission from referral bonus (only from ads/tasks, not airdrop)
+                    // For now, we'll track it separately
+                    const commission = 0; // Commission only from future ads/tasks
+
+                    await referrerRef.update({
+                        referrals: referrals,
+                        referralCount: referrals.length
+                    });
+                }
+            } catch (error) {
+                console.error('[v0] Error adding referral:', error);
+            }
+        }
+
         async function loadSettings() {
             try {
                 const settingsDoc = await db.collection('settings').doc('config').get();
@@ -813,11 +857,10 @@
                     };
                 }
             } catch (error) {
-                console.error('Error loading settings:', error);
+                console.error('[v0] Error loading settings:', error);
             }
         }
 
-        // Setup Event Listeners
         function setupEventListeners() {
             document.getElementById('settingsIcon').addEventListener('click', () => {
                 openModal('settingsModal');
@@ -850,7 +893,6 @@
 
             document.getElementById('adsBtn').addEventListener('click', () => {
                 if (adsWatchedToday < settings.maxAdsPerDay) {
-                    // Monetag ads will be shown via the SDK
                     watchAd();
                 } else {
                     alert('You have reached the daily ads limit');
@@ -880,9 +922,8 @@
             });
         }
 
-        // Update UI
         function updateUI() {
-            if (userData) {
+            if (userData && settings) {
                 document.getElementById('balanceAmount').textContent = userData.balance.toFixed(2);
                 document.getElementById('adsTitle').textContent = `Ads Limit - ${adsWatchedToday}/${settings.maxAdsPerDay}`;
                 document.getElementById('adsReward').textContent = `$TON ${settings.rewardPerAd}`;
@@ -890,7 +931,6 @@
             }
         }
 
-        // Update Wallet Info
         function updateWalletInfo() {
             if (tonConnectUI.connected) {
                 const address = tonConnectUI.account.address;
@@ -905,7 +945,6 @@
             }
         }
 
-        // Update User Wallet
         async function updateUserWallet(address) {
             if (currentUser && userData) {
                 try {
@@ -914,12 +953,11 @@
                     });
                     userData.walletId = address;
                 } catch (error) {
-                    console.error('Error updating wallet:', error);
+                    console.error('[v0] Error updating wallet:', error);
                 }
             }
         }
 
-        // Watch Ad
         async function watchAd() {
             if (adsWatchedToday < settings.maxAdsPerDay) {
                 adsWatchedToday++;
@@ -929,25 +967,50 @@
                     await db.collection('users').doc(currentUser).update({
                         balance: newBalance,
                         totalAds: (userData.totalAds || 0) + 1,
-                        adsWatchedToday: adsWatchedToday
+                        adsWatchedToday: adsWatchedToday,
+                        totalEarnings: (userData.totalEarnings || 0) + settings.rewardPerAd
                     });
 
                     userData.balance = newBalance;
                     userData.totalAds = (userData.totalAds || 0) + 1;
+
+                    // Give referrer 50% commission
+                    if (userData.referredBy) {
+                        const commission = settings.rewardPerAd * (settings.referralCommission / 100);
+                        await giveReferrerCommission(userData.referredBy, commission);
+                    }
+
                     updateUI();
                 } catch (error) {
-                    console.error('Error updating ads:', error);
+                    console.error('[v0] Error updating ads:', error);
                 }
             }
         }
 
-        // Verify User
+        async function giveReferrerCommission(referrerId, commission) {
+            try {
+                const referrerRef = db.collection('users').doc(referrerId);
+                const referrerDoc = await referrerRef.get();
+
+                if (referrerDoc.exists) {
+                    const referrerData = referrerDoc.data();
+                    const newBalance = (referrerData.balance || 0) + commission;
+
+                    await referrerRef.update({
+                        balance: newBalance,
+                        totalEarnings: (referrerData.totalEarnings || 0) + commission
+                    });
+                }
+            } catch (error) {
+                console.error('[v0] Error giving commission:', error);
+            }
+        }
+
         async function verifyUser() {
             try {
-                // Send message to bot
-                const botUsername = 'VTonAirDrop_bot';
-                const message = `/start`;
-                const url = `https://t.me/${botUsername}?start=${currentUser}`;
+                // Correct referral link format: https://t.me/vtonairdrop_bot?startapp={userId}
+                const botUsername = 'vtonairdrop_bot';
+                const url = `https://t.me/${botUsername}?startapp=${currentUser}`;
                 window.open(url, '_blank');
 
                 // Mark as verified after a delay
@@ -959,23 +1022,22 @@
                         userData.verified = true;
                         document.getElementById('unverifiedOverlay').classList.remove('active');
                     } catch (error) {
-                        console.error('Error verifying user:', error);
+                        console.error('[v0] Error verifying user:', error);
                     }
                 }, 2000);
             } catch (error) {
-                console.error('Error in verification:', error);
+                console.error('[v0] Error in verification:', error);
             }
         }
 
-        // Update Referral Link
         function updateReferralLink() {
             if (userData && userData.referralCode) {
-                const referralLink = `https://vtonairdrop.blogspot.com?ref=${userData.referralCode}`;
+                // Correct format: https://t.me/vtonairdrop_bot?startapp={userId}
+                const referralLink = `https://t.me/vtonairdrop_bot?startapp=${userData.referralCode}`;
                 document.getElementById('referralLink').textContent = referralLink;
             }
         }
 
-        // Copy Referral Link
         function copyReferralLink() {
             const link = document.getElementById('referralLink').textContent;
             navigator.clipboard.writeText(link).then(() => {
@@ -983,7 +1045,6 @@
             });
         }
 
-        // Share Referral Link
         function shareReferralLink() {
             const link = document.getElementById('referralLink').textContent;
             if (navigator.share) {
@@ -998,7 +1059,6 @@
             }
         }
 
-        // Update Withdrawal Progress
         function updateWithdrawalProgress() {
             if (userData) {
                 const referralCount = userData.referralCount || 0;
@@ -1009,7 +1069,6 @@
             }
         }
 
-        // Complete Withdrawal
         async function completeWithdrawal() {
             if (userData.balance >= settings.minWithdrawal) {
                 try {
@@ -1023,7 +1082,7 @@
                     closeModal('withdrawalModal');
                     updateUI();
                 } catch (error) {
-                    console.error('Error completing withdrawal:', error);
+                    console.error('[v0] Error completing withdrawal:', error);
                 }
             } else {
                 alert('Insufficient balance for withdrawal');
@@ -1034,10 +1093,6 @@
         function formatAddress(address) {
             if (!address) return '';
             return `${address.slice(0, 6)}...${address.slice(-4)}`;
-        }
-
-        function generateReferralCode() {
-            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         }
 
         function openModal(modalId) {
